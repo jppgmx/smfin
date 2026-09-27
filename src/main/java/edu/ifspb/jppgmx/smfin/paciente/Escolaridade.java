@@ -1,6 +1,8 @@
 package edu.ifspb.jppgmx.smfin.paciente;
 
-public enum Escolaridade {
+import edu.ifspb.jppgmx.smfin.DominioCodificado;
+
+public enum Escolaridade implements DominioCodificado<Integer> {
     ANALFABETO(0, "Analfabeto"),
     FUNDAMENTAL_I_INCOMPLETO(1, "1ª a 4ª série incompleta do EF (antigo primário ou 1º grau)"),
     FUNDAMENTAL_I_COMPLETO(2, "4ª série completa do EF (antigo primário ou 1º grau)"),
@@ -21,16 +23,18 @@ public enum Escolaridade {
         this.descricao = descricao;
     }
 
-    public int getCodigo() {
+    @Override
+    public Integer getCodigo() {
         return codigo;
     }
 
+    @Override
     public String getDescricao() {
         return descricao;
     }
 
     @Override
     public String toString() {
-        return String.format("%d - %s", codigo, descricao);
+        return formatarDominio();
     }
 }

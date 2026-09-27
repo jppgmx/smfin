@@ -1,27 +1,31 @@
 package edu.ifspb.jppgmx.smfin.paciente;
 
-public enum Sexo {
+import edu.ifspb.jppgmx.smfin.DominioCodificado;
+
+public enum Sexo implements DominioCodificado<Character> {
     MASCULINO('M', "Masculino"), FEMININO('F', "Feminino"),
     IGNORADO('I', "Ignorado");
 
-    private char sexo;
-    private String displayName;
+    private final char codigo;
+    private final String descricao;
 
-    Sexo(char sexo, String displayName) {
-        this.sexo = sexo;
-        this.displayName = displayName;
+    Sexo(char codigo, String descricao) {
+        this.codigo = codigo;
+        this.descricao = descricao;
     }
 
-    public char getSexo() {
-        return sexo;
+    @Override
+    public Character getCodigo() {
+        return codigo;
     }
 
-    public String getDisplayName() {
-        return this.displayName;
+    @Override
+    public String getDescricao() {
+        return descricao;
     }
 
     @Override
     public String toString() {
-        return String.format("%c - %s", this.sexo, this.displayName);
+        return formatarDominio();
     }
 }

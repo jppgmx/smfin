@@ -1,6 +1,8 @@
 package edu.ifspb.jppgmx.smfin.paciente;
 
-public enum RacaCor {
+import edu.ifspb.jppgmx.smfin.DominioCodificado;
+
+public enum RacaCor implements DominioCodificado<Integer> {
     BRANCO(1, "Branco(a)"), PRETO(2, "Preto(a)"),
     AMARELO(3, "Amarelo(a)"), PARDO(4, "Pardo(a)"),
     INDIGENA(5, "Indígena"), IGNORADO(9, "Ignorado");
@@ -13,11 +15,18 @@ public enum RacaCor {
         this.descricao = descricao;
     }
 
-    public int getCodigo() {
+    @Override
+    public Integer getCodigo() {
         return codigo;
     }
 
+    @Override
     public String getDescricao() {
         return descricao;
+    }
+
+    @Override
+    public String toString() {
+        return formatarDominio();
     }
 }

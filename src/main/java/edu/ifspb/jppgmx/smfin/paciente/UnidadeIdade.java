@@ -1,6 +1,8 @@
 package edu.ifspb.jppgmx.smfin.paciente;
 
-public enum UnidadeIdade {
+import edu.ifspb.jppgmx.smfin.DominioCodificado;
+
+public enum UnidadeIdade implements DominioCodificado<Integer> {
     HORAS(1, "Hora", "Horas"), DIAS(2, "Dia", "Dias"),
     MESES(3, "Mês", "Meses"), ANOS(4, "Ano", "Anos");
 
@@ -14,8 +16,14 @@ public enum UnidadeIdade {
         this.plural = plural;
     }
 
-    public int getCodigo() {
+    @Override
+    public Integer getCodigo() {
         return codigo;
+    }
+
+    @Override
+    public String getDescricao() {
+        return getSingular();
     }
 
     public String getSingular() {
@@ -31,5 +39,10 @@ public enum UnidadeIdade {
             "%d - %s", valor,
             valor > 1 ? plural : singular
         );
+    }
+
+    @Override
+    public String toString() {
+        return formatarDominio();
     }
 }
