@@ -6,8 +6,8 @@ public enum Zona implements DominioCodificado<Integer> {
     URBANA(1, "Urbana"), RURAL(2, "Rural"),
     PERIURBANA(3, "Periurbana"), IGNORADO(9, "Ignorado");
 
-    private int codigo;
-    private String descricao;
+    private final int codigo;
+    private final String descricao;
 
     Zona(int codigo, String descricao) {
         this.codigo = codigo;

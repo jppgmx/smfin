@@ -5,8 +5,8 @@ import edu.ifspb.jppgmx.smfin.DominioCodificado;
 public enum ClassificacaoFinal implements DominioCodificado<Integer> {
     CONFIRMADO(1, "Confirmado"), DESCARTADO(2, "Descartado");
 
-    private int codigo;
-    private String descricao;
+    private final int codigo;
+    private final String descricao;
 
     ClassificacaoFinal(int codigo, String descricao) {
         this.codigo = codigo;
