@@ -6,7 +6,7 @@ public record Paciente(
     String nome,
     LocalDate dataNascimento,
     int idadeAparente,
-    UnidadeIdade unidadeIdade,
+    IdadeUnidade idadeUnidade,
     Sexo sexo,
     Gestante gestante,
     RacaCor racaCor,

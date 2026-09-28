@@ -22,7 +22,7 @@ public record FichaNotificacao(
     CriterioConfirmacao criterioConfirmacaoDescarte,
     Autoctone autoctone,
     Localidade localProvavelSurto,
-    DoencaRelacionadoTrabalho relacionadoTrabalho,
+    DoencaRelacionadaTrabalho relacionadoTrabalho,
     EvolucaoCaso evolucaoCaso,
     LocalDate dataObito,
     LocalDate dataEncerramento,

@@ -2,7 +2,7 @@ package edu.ifspb.jppgmx.smfin.paciente;
 
 import edu.ifspb.jppgmx.smfin.DominioCodificado;
 
-public enum UnidadeIdade implements DominioCodificado<Integer> {
+public enum IdadeUnidade implements DominioCodificado<Integer> {
     HORAS(1, "Hora", "Horas"), DIAS(2, "Dia", "Dias"),
     MESES(3, "Mês", "Meses"), ANOS(4, "Ano", "Anos");
 
@@ -10,7 +10,7 @@ public enum UnidadeIdade implements DominioCodificado<Integer> {
     private final String singular;
     private final String plural;
 
-    UnidadeIdade(int codigo, String singular, String plural) {
+    IdadeUnidade(int codigo, String singular, String plural) {
         this.codigo = codigo;
         this.singular = singular;
         this.plural = plural;
