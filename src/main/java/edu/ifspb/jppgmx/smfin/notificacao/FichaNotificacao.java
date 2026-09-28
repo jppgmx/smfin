@@ -18,15 +18,19 @@ public record FichaNotificacao(
     Paciente paciente,
     EnderecoResidencial endereco,
     LocalDate dataInvestigacao,
-    ClassificacaoFinal classficacaoFinal,
+    ClassificacaoFinal classificacaoFinal,
     CriterioConfirmacao criterioConfirmacaoDescarte,
     Autoctone autoctone,
-    Localidade localProvavelSurto,
+    Localidade localProvavelInfeccao,
     DoencaRelacionadaTrabalho relacionadoTrabalho,
     EvolucaoCaso evolucaoCaso,
     LocalDate dataObito,
     LocalDate dataEncerramento,
     String observacoes,
-    Investigador investigadorResponsavel
+    Investigador investigadorResponsavel,
+    Unidade unidadeInvestigadora,
+    String assinaturaResponsavel,
+    LocalDate assinadoEm,
+    LocalDate atualizadoEm
 ) {
 }

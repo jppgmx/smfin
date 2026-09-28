@@ -1,6 +1,7 @@
 package edu.ifspb.jppgmx.smfin.localidade;
 
-public record EnderecoResidencial(Localidade base,
+public record EnderecoResidencial(int id,
+                                  Localidade base,
                                   String logradouro,
                                   String codigoLogradouro,
                                   String numero,
