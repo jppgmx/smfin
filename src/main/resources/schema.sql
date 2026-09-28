@@ -4,14 +4,14 @@
 ========================================
 */
 
-CREATE TABLE Estado
+CREATE TABLE IF NOT EXISTS Estado
 (
     id    INT PRIMARY KEY,
     sigla VARCHAR(2)   NOT NULL UNIQUE,
     nome  VARCHAR(100) NOT NULL UNIQUE
 );
 
-CREATE TABLE Cidade
+CREATE TABLE IF NOT EXISTS Cidade
 (
     codigo_ibge INT PRIMARY KEY,
     nome        VARCHAR(100) NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE Cidade
     FOREIGN KEY (estado_id) REFERENCES Estado (id)
 );
 
-CREATE TABLE Localidade
+CREATE TABLE IF NOT EXISTS Localidade
 (
     id                 INTEGER PRIMARY KEY AUTOINCREMENT, -- ID sintético
     pais               VARCHAR(200),       -- Paciente pode estar em outro país
@@ -29,7 +29,7 @@ CREATE TABLE Localidade
     FOREIGN KEY (cidade_codigo_ibge) REFERENCES Cidade (codigo_ibge)
 );
 
-CREATE TABLE EnderecoResidencial
+CREATE TABLE IF NOT EXISTS EnderecoResidencial
 (
     -- Toda ficha vai fazer cópias dos mesmos dados, pois não é possível reutilizar
     id                INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,7 +60,7 @@ CREATE TABLE EnderecoResidencial
 ========================================
 */
 
-CREATE TABLE Paciente
+CREATE TABLE IF NOT EXISTS Paciente
 (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,     -- ID sintético
     nome            VARCHAR(200) NOT NULL,
@@ -103,7 +103,7 @@ CREATE TABLE Paciente
 ========================================
 */
 
-CREATE TABLE Unidade
+CREATE TABLE IF NOT EXISTS Unidade
 (
     codigo                VARCHAR(20) PRIMARY KEY,
     nome                  VARCHAR(200) NOT NULL,
@@ -112,14 +112,14 @@ CREATE TABLE Unidade
     FOREIGN KEY (municipio_codigo_ibge) REFERENCES Cidade (codigo_ibge)
 );
 
-CREATE TABLE Investigador
+CREATE TABLE IF NOT EXISTS Investigador
 (
     id     INTEGER PRIMARY KEY AUTOINCREMENT, -- ID sintético,
     nome   VARCHAR(200) NOT NULL,
     funcao VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE UnidadeInvestigador
+CREATE TABLE IF NOT EXISTS UnidadeInvestigador
 (
     unidade_codigo  VARCHAR(20) NOT NULL,
     investigador_id INT         NOT NULL,
@@ -128,13 +128,13 @@ CREATE TABLE UnidadeInvestigador
     FOREIGN KEY (investigador_id) REFERENCES Investigador (id)
 );
 
-CREATE TABLE AgravoDoenca
+CREATE TABLE IF NOT EXISTS AgravoDoenca
 (
     cid10_codigo VARCHAR(20) PRIMARY KEY,
     nome         VARCHAR(200) NOT NULL
 );
 
-CREATE TABLE FichaNotificacao
+CREATE TABLE IF NOT EXISTS FichaNotificacao
 (
     id                                VARCHAR(50) PRIMARY KEY, -- Cada unidade pode adicionar um ID de preferência.
     tipo                              INT         NOT NULL,    -- enum smfin.notificacao.TipoNotificacao::getCodigo()
