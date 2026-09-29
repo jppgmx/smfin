@@ -149,7 +149,6 @@ CREATE TABLE IF NOT EXISTS FichaNotificacao
     classificacao_final               INT,                     -- enum smfin.notificacao.ClassificacaoFinal::getCodigo()
     criterico_conf_descarte           INT,                     -- enum smfin.notificacao.CriterioConfirmacao::getCodigo()
     caso_autoctone                    INT,                     -- enum smfin.notificacao.Autoctone::getCodigo()
-    local_surto_id                    INT,                     -- Local provável de surto
     local_provavel_infeccao_id        INT,                     -- Campos 35 a 39
     doenca_relacionada_trabalho       INT,                     -- enum smfin.notificacao.DoencaRelacionadaTrabalho::getCodigo()
     evolucao_caso                     INT,                     -- enum smfin.notificacao.EvolucaoCaso::getCodigo(),
@@ -157,7 +156,6 @@ CREATE TABLE IF NOT EXISTS FichaNotificacao
     data_encerramento                 DATE,
     observacoes                       TEXT,                    -- Observações gerais da investigação
     investigador_responsavel_id       INT,
-    unidade_investigadora_codigo      VARCHAR(20),
     assinatura_responsavel            TEXT,
     assinado_em                       DATE,
     atualizado_em                     DATE,
@@ -167,17 +165,14 @@ CREATE TABLE IF NOT EXISTS FichaNotificacao
     FOREIGN KEY (unidade_registradora_codigo) REFERENCES Unidade (codigo),
     FOREIGN KEY (paciente_id) REFERENCES Paciente (id),
     FOREIGN KEY (endereco_residencial_id) REFERENCES EnderecoResidencial (id),
-    FOREIGN KEY (local_surto_id) REFERENCES Localidade (id),
     FOREIGN KEY (local_provavel_infeccao_id) REFERENCES Localidade (id),
     FOREIGN KEY (investigador_responsavel_id) REFERENCES Investigador (id),
-    FOREIGN KEY (unidade_investigadora_codigo) REFERENCES Unidade (codigo),
     CONSTRAINT chk_tipo CHECK (tipo IN (1, 2, 3, 4)),
     CONSTRAINT chk_tipo_paciente_endereco CHECK (
         (tipo = 1 AND paciente_id IS NULL AND endereco_residencial_id IS NULL)
         OR (tipo = 2 AND paciente_id IS NOT NULL AND endereco_residencial_id IS NOT NULL
-            AND dataSintomas IS NOT NULL AND local_surto_id IS NULL)
-        OR (tipo = 3 AND paciente_id IS NULL AND endereco_residencial_id IS NOT NULL
-            AND local_surto_id IS NOT NULL)
+            AND dataSintomas IS NOT NULL)
+        OR (tipo = 3 AND paciente_id IS NULL AND endereco_residencial_id IS NOT NULL)
         OR (tipo = 4 AND paciente_id IS NULL AND endereco_residencial_id IS NULL)
     ),
     CONSTRAINT chk_classificacao CHECK (
@@ -273,3 +268,43 @@ INSERT INTO AgravoDoenca (cid10_codigo, nome) VALUES
       ('Z20.4', 'Contato com e exposição à rubéola'),
       ('Z21',   'Estado de infecção assintomática pelo HIV')
 ON CONFLICT(cid10_codigo) DO NOTHING;
+
+-- Amostra de unidades fictícias e investigadores na Paraíba.
+-- Os municípios e seus códigos são dados reais do IBGE.
+INSERT INTO Estado (id, sigla, nome)
+VALUES (25, 'PB', 'Paraíba')
+ON CONFLICT(id) DO NOTHING;
+
+INSERT INTO Municipio (codigo_ibge, nome, estado_id) VALUES
+    (2507507, 'João Pessoa', 25),
+    (2504009, 'Campina Grande', 25),
+    (2513703, 'Santa Rita', 25),
+    (2510808, 'Patos', 25),
+    (2503704, 'Cajazeiras', 25)
+ON CONFLICT(codigo_ibge) DO NOTHING;
+
+INSERT INTO Unidade (codigo, nome, tipo, municipio_codigo_ibge) VALUES
+    ('U-PB-001', 'UBS Jardim do Sol', 1, 2507507),
+    ('U-PB-002', 'Hospital Regional Serra Azul', 2, 2504009),
+    ('U-PB-003', 'UPA Santa Rita Norte', 3, 2513703),
+    ('U-PB-004', 'Clínica Integrada do Sertão', 4, 2510808),
+    ('U-PB-005', 'UBS Cajazeiras Centro', 1, 2503704)
+ON CONFLICT(codigo) DO NOTHING;
+
+INSERT INTO Investigador (id, nome, funcao) VALUES
+    (1001, 'Ana Beatriz Moura', 'Enfermeira sanitarista'),
+    (1002, 'Bruno Henrique Lima', 'Médico epidemiologista'),
+    (1003, 'Carla Renata Alves', 'Técnica de vigilância epidemiológica'),
+    (1004, 'Diego Ferreira Costa', 'Biólogo'),
+    (1005, 'Elisa Maria Nunes', 'Assistente de saúde pública')
+ON CONFLICT(id) DO NOTHING;
+
+INSERT INTO UnidadeInvestigador (unidade_codigo, investigador_id) VALUES
+    ('U-PB-001', 1001),
+    ('U-PB-002', 1002),
+    ('U-PB-003', 1003),
+    ('U-PB-004', 1004),
+    ('U-PB-005', 1005),
+    ('U-PB-001', 1003),
+    ('U-PB-002', 1001)
+ON CONFLICT(unidade_codigo, investigador_id) DO NOTHING;

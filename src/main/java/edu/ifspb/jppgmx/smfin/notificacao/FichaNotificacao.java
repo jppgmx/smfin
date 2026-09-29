@@ -28,7 +28,6 @@ public record FichaNotificacao(
     LocalDate dataEncerramento,
     String observacoes,
     Investigador investigadorResponsavel,
-    Unidade unidadeInvestigadora,
     String assinaturaResponsavel,
     LocalDate assinadoEm,
     LocalDate atualizadoEm
