@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS Estado
     nome  VARCHAR(100) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS Cidade
+CREATE TABLE IF NOT EXISTS Municipio
 (
     codigo_ibge INT PRIMARY KEY,
     nome        VARCHAR(100) NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS Localidade
     distrito           VARCHAR(200),       -- Opcional
     bairro             VARCHAR(200),       -- Opcional
     cidade_codigo_ibge INT,                -- Opcional, pois pode ser outro país
-    FOREIGN KEY (cidade_codigo_ibge) REFERENCES Cidade (codigo_ibge)
+    FOREIGN KEY (cidade_codigo_ibge) REFERENCES Municipio (codigo_ibge)
 );
 
 CREATE TABLE IF NOT EXISTS EnderecoResidencial
@@ -35,12 +35,12 @@ CREATE TABLE IF NOT EXISTS EnderecoResidencial
     id                INTEGER PRIMARY KEY AUTOINCREMENT,
     id_localidade     INT NOT NULL,
     logradouro        VARCHAR(200),
-    logradouro_codigo VARCHAR(20),  -- Código do logradouro, se houver
+    codigo_logradouro VARCHAR(20),  -- Código do logradouro, se houver
     numero            VARCHAR(20),  -- NULL é sem número,
     complemento       VARCHAR(200),
     geocampo1         VARCHAR(200), -- Campo de geolocalização 1
     geocampo2         VARCHAR(200), -- Campo de geolocalização 2
-    pontoReferencia   VARCHAR(200), -- Ponto de referência
+    ponto_referencia   VARCHAR(200), -- Ponto de referência
     cep               VARCHAR(10),  -- XXXXX-XXX
     zona              INT,          -- enum smfin.localidade.Zona::getCodigo()
     telefone          VARCHAR(20),
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS EnderecoResidencial
 
     -- Faz sentido preencher o código do logradouro quando logradouro está preenchido.
     CONSTRAINT chk_logradouro_codigo
-        CHECK (logradouro_codigo IS NULL OR logradouro IS NOT NULL),
+        CHECK (codigo_logradouro IS NULL OR logradouro IS NOT NULL),
     CONSTRAINT chk_zona CHECK (zona IS NULL OR zona IN (1, 2, 3, 9)),
     CONSTRAINT chk_cep CHECK (cep IS NULL OR length(replace(cep, '-', '')) = 8)
 );
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS Unidade
     nome                  VARCHAR(200) NOT NULL,
     tipo                  INT          NOT NULL, -- enum smfin.notificacao.Unidade.Tipo::getCodigo(),
     municipio_codigo_ibge INT          NOT NULL,
-    FOREIGN KEY (municipio_codigo_ibge) REFERENCES Cidade (codigo_ibge)
+    FOREIGN KEY (municipio_codigo_ibge) REFERENCES Municipio (codigo_ibge)
 );
 
 CREATE TABLE IF NOT EXISTS Investigador
@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS FichaNotificacao
     atualizado_em                     DATE,
 
     FOREIGN KEY (agdo_cid10_codigo) REFERENCES AgravoDoenca (cid10_codigo),
-    FOREIGN KEY (municipio_notificacao_codigo_ibge) REFERENCES Cidade (codigo_ibge),
+    FOREIGN KEY (municipio_notificacao_codigo_ibge) REFERENCES Municipio (codigo_ibge),
     FOREIGN KEY (unidade_registradora_codigo) REFERENCES Unidade (codigo),
     FOREIGN KEY (paciente_id) REFERENCES Paciente (id),
     FOREIGN KEY (endereco_residencial_id) REFERENCES EnderecoResidencial (id),
@@ -213,3 +213,63 @@ CREATE TABLE IF NOT EXISTS FichaNotificacao
         atualizado_em IS NULL OR atualizado_em >= data_notificacao
     )
 );
+
+/*
+========================================
+-- Inserções
+========================================
+*/
+
+-- Amostra de agravos/doenças para testes. Não é uma lista completa.
+INSERT INTO AgravoDoenca (cid10_codigo, nome) VALUES
+      ('A90',   'Dengue'),
+      ('A71',   'Tracoma'),
+      ('B01.9', 'Varicela sem complicações'),
+      ('B03',   'Varíola'),
+      ('Y09',   'Violência interpessoal/autoprovocada'),
+      ('X29',   'Acidente por animais peçonhentos'),
+      ('A15',   'Tuberculose respiratória'),
+      ('A30',   'Hanseníase'),
+      ('B54',   'Malária não especificada'),
+      ('B57',   'Doença de Chagas'),
+      ('A82',   'Raiva'),
+      ('A95',   'Febre amarela'),
+      ('A92.0', 'Febre de Chikungunya'),
+      ('A92.8', 'Zika vírus'),
+      ('B15',   'Hepatite A'),
+      ('B16',   'Hepatite B'),
+      ('B18.2', 'Hepatite C viral crônica'),
+      ('A00',   'Cólera'),
+      ('A01',   'Febre tifóide e paratifóide'),
+      ('A36',   'Difteria'),
+      ('A37',   'Coqueluche'),
+      ('A33',   'Tétano neonatal'),
+      ('A35',   'Tétano acidental (outros)'),
+      ('A39',   'Infecção meningocócica'),
+      ('B05',   'Sarampo'),
+      ('B06',   'Rubéola'),
+      ('B24',   'Doença pelo vírus da imunodeficiência humana [HIV]'),
+      ('A50',   'Sífilis congênita'),
+      ('A53',   'Sífilis adquirida'),
+      ('A87',   'Meningite viral'),
+      ('G00',   'Meningite bacteriana não especificada'),
+      ('A80',   'Poliomielite aguda'),
+      ('A27',   'Leptospirose'),
+      ('B08.1', 'Eritema infeccioso'),
+      ('B26',   'Caxumba'),
+      ('A81',   'Doença de Creutzfeldt-Jakob'),
+      ('U07.1', 'COVID-19'),
+      ('A77.0', 'Febre maculosa'),
+      ('A08',   'Infecções intestinais virais'),
+      ('B55',   'Leishmaniose'),
+      ('A20',   'Peste'),
+      ('A22',   'Carbúnculo'),
+      ('B01',   'Varicela (Catapora)'),
+      ('J10',   'Influenza devida a vírus influenza identificado'),
+      ('W54',   'Mordedura ou golpe provocado por cão'),
+      ('X27',   'Contato com escorpião'),
+      ('X28',   'Contato com abelha, vespa ou marimbondo'),
+      ('Z20.3', 'Contato com e exposição à raiva'),
+      ('Z20.4', 'Contato com e exposição à rubéola'),
+      ('Z21',   'Estado de infecção assintomática pelo HIV')
+ON CONFLICT(cid10_codigo) DO NOTHING;
