@@ -19,9 +19,9 @@ public class PacienteRepository {
     }
 
     public Paciente save(Paciente paciente) {
-        final String sql = "INSERT INTO  Paciente(nome, data_nascimento, idade, idade_unidade, sexo, gestante, raca_cor, escolaridade, cns, nome_mae, id_residencial) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        final String sql = "INSERT INTO Paciente(nome, data_nascimento, idade, idade_unidade, sexo, gestante, raca_cor, escolaridade, numero_cns, nome_mae, endereco_residencial_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        var endereco = localidadeRepository.save(paciente.endereco());
+        var endereco = localidadeRepository.save(paciente.enderecoResidencial());
         var keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             var ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -33,7 +33,7 @@ public class PacienteRepository {
             ps.setObject(6, paciente.gestante().getCodigo());
             ps.setObject(7, paciente.racaCor().getCodigo());
             ps.setObject(8, paciente.escolaridade().getCodigo());
-            ps.setString(9, paciente.cns());
+            ps.setString(9, paciente.numeroCns());
             ps.setString(10, paciente.nomeMae());
             ps.setObject(11, endereco.id());
             return ps;
@@ -43,6 +43,8 @@ public class PacienteRepository {
             return new Paciente(
                 (Integer) keyHolder.getKeys().get("id"),
                 paciente.nome(),
+                paciente.nomeMae(),
+                paciente.numeroCns(),
                 paciente.dataNascimento(),
                 paciente.idade(),
                 paciente.idadeUnidade(),
@@ -50,8 +52,6 @@ public class PacienteRepository {
                 paciente.gestante(),
                 paciente.racaCor(),
                 paciente.escolaridade(),
-                paciente.cns(),
-                paciente.nomeMae(),
                 endereco
             );
         } else {
@@ -63,10 +63,12 @@ public class PacienteRepository {
         final String sql = "SELECT * FROM Paciente WHERE id = ?";
 
         return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
-            var endereco = localidadeRepository.findEnderecoResidencialById(rs.getInt("id_residencial"));
+            var endereco = localidadeRepository.findEnderecoResidencialById(rs.getInt("endereco_residencial_id"));
             return new Paciente(
                 rs.getInt("id"),
                 rs.getString("nome"),
+                rs.getString("nome_mae"),
+                rs.getString("numero_cns"),
                 rs.getObject("data_nascimento", java.time.LocalDate.class),
                 rs.getObject("idade", Integer.class),
                 DominioCodificado.fromCodigo(rs.getObject("idade_unidade", Integer.class), IdadeUnidade.class),
@@ -74,8 +76,6 @@ public class PacienteRepository {
                 DominioCodificado.fromCodigo(rs.getObject("gestante", Integer.class), Gestante.class),
                 DominioCodificado.fromCodigo(rs.getObject("raca_cor", Integer.class), RacaCor.class),
                 DominioCodificado.fromCodigo(rs.getObject("escolaridade", Integer.class), Escolaridade.class),
-                rs.getString("cns"),
-                rs.getString("nome_mae"),
                 endereco
             );
         }, id);

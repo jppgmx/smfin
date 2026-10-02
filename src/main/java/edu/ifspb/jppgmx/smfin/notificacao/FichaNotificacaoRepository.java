@@ -34,45 +34,41 @@ public class FichaNotificacaoRepository {
 
     public FichaNotificacao salvar(FichaNotificacao fichaNotificacao) {
         final String sql = "INSERT INTO FichaNotificacao(" +
-                "id, tipo, agdo_cid10_codigo, data_notificacao, municipio_notificacao_codigo_ibge, " +
-                "unidade_registradora_codigo, dataSintomas, paciente_id, endereco_residencial_id, " +
-                "data_investigacao, classificacao_final, criterico_conf_descarte, caso_autoctone, " +
-                "local_provavel_infeccao_id, doenca_relacionada_trabalho, evolucao_caso, " +
-                "data_obito, data_encerramento, observacoes, investigador_responsavel_id, " +
-                "assinatura_responsavel, assinado_em, atualizado_em" +
-                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "id, tipo, data_notificacao, data_sintoma, data_investigacao, classificacao_final, " +
+                "criterio_cd, caso_autoctone, doenca_relacionada_trabalho, evolucao, data_obito, " +
+                "data_encerramento, observacoes, municipio_notificacao_codigo_ibge, " +
+                "unidade_notificadora_codigo, investigador_responsavel_id, agravo_cid10, paciente_id, " +
+                "local_provavel_id" +
+                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         var municipioNotificado = localidadeRepository.save(fichaNotificacao.municipioNotificado());
-        var paciente = pacienteRepository.save(fichaNotificacao.paciente());
-        var enderecoResidencial = paciente.endereco();
-        var localProvavelInfeccao = localidadeRepository.save(fichaNotificacao.localProvavelInfeccao());
+        var paciente = fichaNotificacao.paciente() == null ? null :
+                pacienteRepository.save(fichaNotificacao.paciente());
+        var localProvavelInfeccao = fichaNotificacao.localProvavelInfeccao() == null
+                ? null : localidadeRepository.save(fichaNotificacao.localProvavelInfeccao());
 
         var id = String.format("%s-%d", fichaNotificacao.unidadeNotificadora().codigo(), System.currentTimeMillis());
 
         jdbcTemplate.update(sql,
             id,
             fichaNotificacao.tipo().getCodigo(),
-            fichaNotificacao.agravoDoenca().cid10(),
             fichaNotificacao.dataNotificacao(),
-            municipioNotificado.codigoIbge(),
-            fichaNotificacao.unidadeNotificadora().codigo(),
-            fichaNotificacao.dataSintomas(),
-            paciente.id(),
-            enderecoResidencial.id(),
+            fichaNotificacao.dataSintoma(),
             fichaNotificacao.dataInvestigacao(),
             fichaNotificacao.classificacaoFinal().getCodigo(),
             fichaNotificacao.criterioConfirmacaoDescarte().getCodigo(),
             fichaNotificacao.autoctone().getCodigo(),
-            localProvavelInfeccao.id(),
             fichaNotificacao.relacionadoTrabalho().getCodigo(),
             fichaNotificacao.evolucaoCaso().getCodigo(),
             fichaNotificacao.dataObito(),
             fichaNotificacao.dataEncerramento(),
             fichaNotificacao.observacoes(),
+            municipioNotificado.codigoIbge(),
+            fichaNotificacao.unidadeNotificadora().codigo(),
             fichaNotificacao.investigadorResponsavel().id(),
-            fichaNotificacao.assinaturaResponsavel(),
-            fichaNotificacao.assinadoEm(),
-            fichaNotificacao.atualizadoEm()
+            fichaNotificacao.agravoDoenca().cid10(),
+            paciente == null ? null : paciente.id(),
+            localProvavelInfeccao == null ? null : localProvavelInfeccao.id()
         );
 
         return new FichaNotificacao(
@@ -82,9 +78,8 @@ public class FichaNotificacaoRepository {
             fichaNotificacao.dataNotificacao(),
             municipioNotificado,
             fichaNotificacao.unidadeNotificadora(),
-            fichaNotificacao.dataSintomas(),
+            fichaNotificacao.dataSintoma(),
             paciente,
-            enderecoResidencial,
             fichaNotificacao.dataInvestigacao(),
             fichaNotificacao.classificacaoFinal(),
             fichaNotificacao.criterioConfirmacaoDescarte(),
@@ -95,10 +90,7 @@ public class FichaNotificacaoRepository {
             fichaNotificacao.dataObito(),
             fichaNotificacao.dataEncerramento(),
             fichaNotificacao.observacoes(),
-            fichaNotificacao.investigadorResponsavel(),
-            fichaNotificacao.assinaturaResponsavel(),
-            fichaNotificacao.assinadoEm(),
-            fichaNotificacao.atualizadoEm()
+            fichaNotificacao.investigadorResponsavel()
         );
     }
 
@@ -109,7 +101,7 @@ public class FichaNotificacaoRepository {
     }
 
     public List<FichaNotificacao> findByUnidade(Unidade unidade) {
-        final String sql = "SELECT * FROM FichaNotificacao WHERE unidade_registradora_codigo = ?";
+        final String sql = "SELECT * FROM FichaNotificacao WHERE unidade_notificadora_codigo = ?";
 
         return jdbcTemplate.query(sql, fichaNotificacaoMapper(), unidade.codigo());
     }
@@ -150,12 +142,12 @@ public class FichaNotificacaoRepository {
     private Optional<DependenciasFicha> findDependencias(String id) {
         final String sql = """
                 SELECT f.paciente_id,
-                       f.endereco_residencial_id,
-                       e.id_localidade AS localidade_endereco_id,
-                       f.local_provavel_infeccao_id
+                       p.endereco_residencial_id,
+                       e.localidade_id AS localidade_endereco_id,
+                       f.local_provavel_id
                 FROM FichaNotificacao f
-                LEFT JOIN EnderecoResidencial e
-                       ON e.id = f.endereco_residencial_id
+                LEFT JOIN Paciente p ON p.id = f.paciente_id
+                LEFT JOIN EnderecoResidencial e ON e.id = p.endereco_residencial_id
                 WHERE f.id = ?
                 """;
 
@@ -163,7 +155,7 @@ public class FichaNotificacaoRepository {
                 (Integer) rs.getObject("paciente_id"),
                 (Integer) rs.getObject("endereco_residencial_id"),
                 (Integer) rs.getObject("localidade_endereco_id"),
-                (Integer) rs.getObject("local_provavel_infeccao_id")
+                (Integer) rs.getObject("local_provavel_id")
         ), id).stream().findFirst();
     }
 
@@ -178,11 +170,13 @@ public class FichaNotificacaoRepository {
     private @NonNull RowMapper<FichaNotificacao> fichaNotificacaoMapper() {
         return (rs, rowNum) -> {
             var municipioNotificado = localidadeRepository.findMunicipioByCodigoIbge(rs.getInt("municipio_notificacao_codigo_ibge"));
-            var paciente = pacienteRepository.findById(rs.getInt("paciente_id"));
-            var enderecoResidencial = paciente.endereco();
-            var localProvavelInfeccao = localidadeRepository.findLocalidadeById(rs.getInt("local_provavel_infeccao_id"));
-            var investigadorResponsavel = investigadorRepository.findById(rs.getInt("investigador_responsavel_id"));
-            var agravoDoenca = agravoDoencaRepository.findByCid10(rs.getString("agdo_cid10_codigo"));
+            var paciente = rs.getObject("paciente_id") == null ? null :
+                    pacienteRepository.findById(rs.getInt("paciente_id"));
+            var localProvavelInfeccao = rs.getObject("local_provavel_id") == null ? null :
+                    localidadeRepository.findLocalidadeById(rs.getInt("local_provavel_id"));
+            var investigadorResponsavel = rs.getObject("investigador_responsavel_id") == null ? null :
+                    investigadorRepository.findById(rs.getInt("investigador_responsavel_id"));
+            var agravoDoenca = agravoDoencaRepository.findByCid10(rs.getString("agravo_cid10"));
 
             return new FichaNotificacao(
                     rs.getString("id"),
@@ -190,24 +184,20 @@ public class FichaNotificacaoRepository {
                     agravoDoenca,
                     rs.getDate("data_notificacao").toLocalDate(),
                     municipioNotificado,
-                    unidadeRepository.findByCodigo(rs.getString("unidade_registradora_codigo")),
-                    rs.getDate("dataSintomas").toLocalDate(),
+                    unidadeRepository.findByCodigo(rs.getString("unidade_notificadora_codigo")),
+                    rs.getDate("data_sintoma") == null ? null : rs.getDate("data_sintoma").toLocalDate(),
                     paciente,
-                    enderecoResidencial,
                     rs.getDate("data_investigacao").toLocalDate(),
-                    DominioCodificado.fromCodigo(rs.getInt("classificacao_final"), ClassificacaoFinal.class),
-                    DominioCodificado.fromCodigo(rs.getInt("criterico_conf_descarte"), CriterioConfirmacao.class),
-                    DominioCodificado.fromCodigo(rs.getInt("caso_autoctone"), Autoctone.class),
+                    DominioCodificado.fromCodigo((Integer) rs.getObject("classificacao_final"), ClassificacaoFinal.class),
+                    DominioCodificado.fromCodigo((Integer) rs.getObject("criterio_cd"), CriterioConfirmacao.class),
+                    DominioCodificado.fromCodigo((Integer) rs.getObject("caso_autoctone"), Autoctone.class),
                     localProvavelInfeccao,
-                    DominioCodificado.fromCodigo(rs.getInt("doenca_relacionada_trabalho"), DoencaRelacionadaTrabalho.class),
-                    DominioCodificado.fromCodigo(rs.getInt("evolucao_caso"), EvolucaoCaso.class),
+                    DominioCodificado.fromCodigo((Integer) rs.getObject("doenca_relacionada_trabalho"), DoencaRelacionadaTrabalho.class),
+                    DominioCodificado.fromCodigo((Integer) rs.getObject("evolucao"), EvolucaoCaso.class),
                     rs.getDate("data_obito") != null ? rs.getDate("data_obito").toLocalDate() : null,
                     rs.getDate("data_encerramento") != null ? rs.getDate("data_encerramento").toLocalDate() : null,
                     rs.getString("observacoes"),
-                    investigadorResponsavel,
-                    rs.getString("assinatura_responsavel"),
-                    rs.getDate("assinado_em") != null ? rs.getDate("assinado_em").toLocalDate() : null,
-                    rs.getDate("atualizado_em") != null ? rs.getDate("atualizado_em").toLocalDate() : null
+                    investigadorResponsavel
             );
         };
     }

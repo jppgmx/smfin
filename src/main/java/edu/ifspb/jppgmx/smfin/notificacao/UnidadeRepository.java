@@ -53,11 +53,12 @@ public class UnidadeRepository {
     }
 
     public List<Investigador> findInvestigadoresByUnidade(Unidade unidade) {
-        final String sql = "SELECT i.* FROM Investigador i JOIN UnidadeInvestigador ui ON i.id = ui.investigador_id WHERE ui.unidade_codigo = ?";
+        final String sql = "SELECT i.* FROM Investigador i WHERE i.unidade_codigo = ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new Investigador(
             rs.getInt("id"),
             rs.getString("nome"),
-            rs.getString("funcao")
+            rs.getString("funcao"),
+            unidade
         ), unidade.codigo());
     }
 }

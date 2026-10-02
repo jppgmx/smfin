@@ -9,19 +9,22 @@ import java.sql.Statement;
 @Repository
 public class InvestigadorRepository {
     private final JdbcTemplate jdbcTemplate;
+    private final UnidadeRepository unidadeRepository;
 
-    public InvestigadorRepository(JdbcTemplate jdbcTemplate) {
+    public InvestigadorRepository(JdbcTemplate jdbcTemplate, UnidadeRepository unidadeRepository) {
         this.jdbcTemplate = jdbcTemplate;
+        this.unidadeRepository = unidadeRepository;
     }
 
     public Investigador save(Investigador investigador) {
-        final String sql = "INSERT INTO Investigador(nome, funcao) VALUES (?, ?)";
+        final String sql = "INSERT INTO Investigador(nome, funcao, unidade_codigo) VALUES (?, ?, ?)";
 
         var keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             var ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, investigador.nome());
             ps.setString(2, investigador.funcao());
+            ps.setString(3, investigador.unidade().codigo());
             return ps;
         }, keyHolder);
 
@@ -29,7 +32,8 @@ public class InvestigadorRepository {
             return new Investigador(
                 (Integer) keyHolder.getKeys().get("id"),
                 investigador.nome(),
-                investigador.funcao()
+                investigador.funcao(),
+                investigador.unidade()
             );
         } else {
             throw new IllegalStateException("O banco não retornou o ID gerado para o investigador.");
@@ -42,7 +46,8 @@ public class InvestigadorRepository {
             return new Investigador(
                 rs.getInt("id"),
                 rs.getString("nome"),
-                rs.getString("funcao")
+                rs.getString("funcao"),
+                unidadeRepository.findByCodigo(rs.getString("unidade_codigo"))
             );
         }, id);
     }

@@ -16,7 +16,7 @@ public class LocalidadeRepository {
     }
 
     public EnderecoResidencial save(EnderecoResidencial enderecoResidencial) {
-        final String sql = "INSERT INTO EnderecoResidencial(id_localidade, logradouro, codigo_logradouro, numero, complemento, geocampo1, geocampo2, pontoReferencia, cep, zona, telefone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        final String sql = "INSERT INTO EnderecoResidencial(localidade_id, logradouro, codigo_logradouro, numero, complemento, geocampo1, geocampo2, ponto_referencia, cep, zona, telefone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         var localidade = save(enderecoResidencial.base());
         var keyHolder = new GeneratedKeyHolder();
@@ -57,7 +57,7 @@ public class LocalidadeRepository {
     }
 
     public Localidade save(Localidade localidade) {
-        final String sql = "INSERT INTO Localidade(pais, distrito, bairro, cidade_codigo_ibge) VALUES (?, ?, ?, ?)";
+        final String sql = "INSERT INTO Localidade(pais, distrito, bairro, municipio_codigo_ibge) VALUES (?, ?, ?, ?)";
 
         var municipio = save(localidade.municipio());
         var keyHolder = new GeneratedKeyHolder();
@@ -102,7 +102,7 @@ public class LocalidadeRepository {
         final String sql = "SELECT * FROM EnderecoResidencial WHERE id = ?";
         return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new EnderecoResidencial(
                 rs.getInt("id"),
-                findLocalidadeById(rs.getInt("id_localidade")),
+                findLocalidadeById(rs.getInt("localidade_id")),
                 rs.getString("logradouro"),
                 rs.getString("codigo_logradouro"),
                 rs.getString("numero"),
@@ -121,7 +121,7 @@ public class LocalidadeRepository {
         return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new Localidade(
                 rs.getInt("id"),
                 rs.getString("pais"),
-                findMunicipioByCodigoIbge(rs.getInt("cidade_codigo_ibge")),
+                findMunicipioByCodigoIbge(rs.getInt("municipio_codigo_ibge")),
                 rs.getString("distrito"),
                 rs.getString("bairro")
         ), id);
