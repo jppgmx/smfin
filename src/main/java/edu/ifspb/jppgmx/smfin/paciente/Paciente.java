@@ -7,6 +7,8 @@ import java.time.LocalDate;
 public record Paciente(
     int id,
     String nome,
+    String nomeMae,
+    String numeroCns,
     LocalDate dataNascimento,
     Integer idade,
     IdadeUnidade idadeUnidade,
@@ -14,8 +16,6 @@ public record Paciente(
     Gestante gestante,
     RacaCor racaCor,
     Escolaridade escolaridade,
-    String cns,
-    String nomeMae,
-    EnderecoResidencial endereco
+    EnderecoResidencial enderecoResidencial
 ) {
 }
