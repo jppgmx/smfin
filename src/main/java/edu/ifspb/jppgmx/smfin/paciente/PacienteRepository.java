@@ -28,11 +28,11 @@ public class PacienteRepository {
             ps.setString(1, paciente.nome());
             ps.setObject(2, paciente.dataNascimento());
             ps.setObject(3, paciente.idade());
-            ps.setObject(4, paciente.idadeUnidade().getCodigo());
+            ps.setObject(4, paciente.idadeUnidade() == null ? null : paciente.idadeUnidade().getCodigo());
             ps.setObject(5, paciente.sexo().getCodigo());
-            ps.setObject(6, paciente.gestante().getCodigo());
-            ps.setObject(7, paciente.racaCor().getCodigo());
-            ps.setObject(8, paciente.escolaridade().getCodigo());
+            ps.setObject(6, paciente.gestante() == null ? null : paciente.gestante().getCodigo());
+            ps.setObject(7, paciente.racaCor() == null ? null : paciente.racaCor().getCodigo());
+            ps.setObject(8, paciente.escolaridade() == null ? null : paciente.escolaridade().getCodigo());
             ps.setString(9, paciente.numeroCns());
             ps.setString(10, paciente.nomeMae());
             ps.setObject(11, endereco.id());

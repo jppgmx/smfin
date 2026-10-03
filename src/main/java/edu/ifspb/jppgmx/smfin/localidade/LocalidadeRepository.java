@@ -31,7 +31,7 @@ public class LocalidadeRepository {
             ps.setString(7, enderecoResidencial.geocampo2());
             ps.setString(8, enderecoResidencial.pontoReferencia());
             ps.setString(9, enderecoResidencial.cep());
-            ps.setInt(10, enderecoResidencial.zona().getCodigo());
+            ps.setObject(10, enderecoResidencial.zona() == null ? null : enderecoResidencial.zona().getCodigo());
             ps.setString(11, enderecoResidencial.telefone());
             return ps;
         }, keyHolder);
