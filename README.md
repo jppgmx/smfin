@@ -10,7 +10,9 @@ O *smfin* é um sistema minimalista desenvolvido para facilitar a criação e ge
 - [x] Implementar esquema SQL para SQLite;
 
 ### Dia 2
-- [ ] Implementar a API RESTful para consulta de estados e municípios via IBGE;
-- [ ] Implementar Problem Details para tratamento de erros na API;
+- [x] Implementar a API RESTful para consulta de estados e municípios via IBGE;
+- [x] Implementar Problem Details para tratamento de erros na API;
+- [x] Implementar o esquema SQL da ficha de notifcação;
+- [x] Implementar a API RESTful para CRUD da ficha de notificação;
 
 *(A desenvolver demais tarefas)*

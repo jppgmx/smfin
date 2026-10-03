@@ -14,9 +14,8 @@ public record FichaNotificacao(
     LocalDate dataNotificacao,
     Municipio municipioNotificado,
     Unidade unidadeNotificadora,
-    LocalDate dataSintomas,
+    LocalDate dataSintoma,
     Paciente paciente,
-    EnderecoResidencial endereco,
     LocalDate dataInvestigacao,
     ClassificacaoFinal classificacaoFinal,
     CriterioConfirmacao criterioConfirmacaoDescarte,
@@ -27,10 +26,6 @@ public record FichaNotificacao(
     LocalDate dataObito,
     LocalDate dataEncerramento,
     String observacoes,
-    Investigador investigadorResponsavel,
-    Unidade unidadeInvestigadora,
-    String assinaturaResponsavel,
-    LocalDate assinadoEm,
-    LocalDate atualizadoEm
+    Investigador investigadorResponsavel
 ) {
 }
