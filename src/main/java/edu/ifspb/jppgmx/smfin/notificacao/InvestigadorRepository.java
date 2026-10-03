@@ -5,6 +5,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Statement;
+import java.util.List;
 
 @Repository
 public class InvestigadorRepository {
@@ -50,5 +51,29 @@ public class InvestigadorRepository {
                 unidadeRepository.findByCodigo(rs.getString("unidade_codigo"))
             );
         }, id);
+    }
+
+    public List<Investigador> findAll() {
+        final String sql = "SELECT * FROM Investigador";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            return new Investigador(
+                rs.getInt("id"),
+                rs.getString("nome"),
+                rs.getString("funcao"),
+                unidadeRepository.findByCodigo(rs.getString("unidade_codigo"))
+            );
+        });
+    }
+
+    public Investigador fromUnidade(Unidade unidade, Integer id) {
+        final String sql = "SELECT * FROM Investigador WHERE id = ? AND unidade_codigo = ?";
+        return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+            return new Investigador(
+                rs.getInt("id"),
+                rs.getString("nome"),
+                rs.getString("funcao"),
+                unidade
+            );
+        }, id, unidade.codigo());
     }
 }
