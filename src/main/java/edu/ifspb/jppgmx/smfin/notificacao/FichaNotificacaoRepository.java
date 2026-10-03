@@ -6,9 +6,13 @@ import edu.ifspb.jppgmx.smfin.paciente.PacienteRepository;
 import org.jspecify.annotations.NonNull;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +36,7 @@ public class FichaNotificacaoRepository {
         this.agravoDoencaRepository = agravoDoencaRepository;
     }
 
-    public FichaNotificacao salvar(FichaNotificacao fichaNotificacao) {
+    public FichaNotificacao save(FichaNotificacao fichaNotificacao) {
         final String sql = "INSERT INTO FichaNotificacao(" +
                 "id, tipo, data_notificacao, data_sintoma, data_investigacao, classificacao_final, " +
                 "criterio_cd, caso_autoctone, doenca_relacionada_trabalho, evolucao, data_obito, " +
@@ -96,8 +100,128 @@ public class FichaNotificacaoRepository {
 
     public FichaNotificacao findById(String id) {
         final String sql = "SELECT * FROM FichaNotificacao WHERE id = ?";
+        return jdbcTemplate.query(sql, fichaNotificacaoMapper(), id).stream().findFirst().orElse(null);
+    }
 
-        return jdbcTemplate.queryForObject(sql, fichaNotificacaoMapper(), id);
+    public Page<FichaNotificacao> findAll(FichaNotificacaoFiltro filtro, Pageable pageable) {
+        var where = new StringBuilder(" FROM FichaNotificacao f " +
+                "LEFT JOIN AgravoDoenca a ON a.cid10 = f.agravo_cid10 " +
+                "LEFT JOIN Paciente p ON p.id = f.paciente_id " +
+                "LEFT JOIN Unidade u ON u.codigo = f.unidade_notificadora_codigo WHERE 1 = 1");
+        var args = new ArrayList<>();
+        appendFilters(where, args, filtro);
+
+        String orderBy = pageable.getSort().stream()
+                .map(order -> sortColumn(order.getProperty()) + " " + order.getDirection())
+                .findFirst().orElse("f.id ASC");
+        var count = jdbcTemplate.queryForObject("SELECT COUNT(*)" + where, Long.class, args.toArray());
+        var sql = "SELECT f.*" + where + " ORDER BY " + orderBy + " LIMIT ? OFFSET ?";
+        args.add(pageable.getPageSize());
+        args.add(pageable.getOffset());
+        return new PageImpl<>(jdbcTemplate.query(sql, fichaNotificacaoMapper(), args.toArray()),
+                pageable, count == null ? 0 : count);
+    }
+
+    private void appendFilters(StringBuilder where, List<Object> args, FichaNotificacaoFiltro filtro) {
+        if (filtro.q() != null && !filtro.q().isBlank()) {
+            where.append(" AND (LOWER(f.id) LIKE LOWER(?) OR LOWER(a.cid10) LIKE LOWER(?) " +
+                    "OR LOWER(a.nome) LIKE LOWER(?) OR LOWER(p.nome) LIKE LOWER(?) " +
+                    "OR LOWER(u.nome) LIKE LOWER(?))");
+            String query = "%" + filtro.q().trim() + "%";
+            args.add(query);
+            args.add(query);
+            args.add(query);
+            args.add(query);
+            args.add(query);
+        }
+        if (filtro.tipo() != null) {
+            where.append(" AND f.tipo = ?");
+            args.add(filtro.tipo());
+        }
+        if (filtro.agravo() != null && !filtro.agravo().isBlank()) {
+            where.append(" AND (LOWER(f.agravo_cid10) = LOWER(?) OR LOWER(a.nome) LIKE LOWER(?))");
+            args.add(filtro.agravo().trim());
+            args.add("%" + filtro.agravo().trim() + "%");
+        }
+        if (filtro.unidade() != null && !filtro.unidade().isBlank()) {
+            where.append(" AND (LOWER(f.unidade_notificadora_codigo) = LOWER(?) OR LOWER(u.nome) LIKE LOWER(?))");
+            args.add(filtro.unidade().trim());
+            args.add("%" + filtro.unidade().trim() + "%");
+        }
+        if (filtro.municipio() != null) {
+            where.append(" AND f.municipio_notificacao_codigo_ibge = ?");
+            args.add(filtro.municipio());
+        }
+        if (filtro.dataNotificacaoInicio() != null) {
+            where.append(" AND f.data_notificacao >= ?");
+            args.add(filtro.dataNotificacaoInicio());
+        }
+        if (filtro.dataNotificacaoFim() != null) {
+            where.append(" AND f.data_notificacao <= ?");
+            args.add(filtro.dataNotificacaoFim());
+        }
+        if (Boolean.TRUE.equals(filtro.duplicata())) {
+            where.append("""
+                    AND EXISTS (
+                        SELECT 1
+                        FROM FichaNotificacao f2
+                        JOIN Paciente p2 ON p2.id = f2.paciente_id
+                        WHERE f2.id <> f.id
+                          AND NULLIF(TRIM(f2.agravo_cid10), '') IS NOT NULL
+                          AND NULLIF(TRIM(p2.nome), '') IS NOT NULL
+                          AND p2.data_nascimento IS NOT NULL
+                          AND NULLIF(TRIM(p2.nome_mae), '') IS NOT NULL
+                          AND f2.data_notificacao IS NOT NULL
+                          AND LOWER(TRIM(f2.agravo_cid10)) = LOWER(TRIM(f.agravo_cid10))
+                          AND %s = %s
+                          AND p2.data_nascimento = p.data_nascimento
+                          AND %s = %s
+                          AND ABS(JULIANDAY(f2.data_notificacao) - JULIANDAY(f.data_notificacao)) <= 3
+                    )
+                    """.formatted(
+                    normalizedSql("p2.nome"), normalizedSql("p.nome"),
+                    normalizedSql("p2.nome_mae"), normalizedSql("p.nome_mae")));
+        }
+    }
+
+    private String normalizedSql(String column) {
+        return "LOWER(TRIM(REPLACE(REPLACE(REPLACE(" + column
+                + ", '  ', ' '), '  ', ' '), '  ', ' ')))";
+    }
+
+    private String sortColumn(String property) {
+        return switch (property) {
+            case "id" -> "f.id";
+            case "tipo" -> "f.tipo";
+            case "dataNotificacao" -> "f.data_notificacao";
+            case "dataInvestigacao" -> "f.data_investigacao";
+            case "dataEncerramento" -> "f.data_encerramento";
+            case "agravo" -> "a.nome";
+            case "unidade" -> "u.nome";
+            default -> "f.id";
+        };
+    }
+
+    public FichaNotificacao update(String id, FichaNotificacao ficha) {
+        if (findById(id) == null) {
+            return null;
+        }
+        final String sql = """
+                UPDATE FichaNotificacao
+                SET tipo = ?, data_notificacao = ?, data_sintoma = ?, data_investigacao = ?,
+                    classificacao_final = ?, criterio_cd = ?, caso_autoctone = ?,
+                    doenca_relacionada_trabalho = ?, evolucao = ?, data_obito = ?,
+                    data_encerramento = ?, observacoes = ?
+                WHERE id = ?
+                """;
+        jdbcTemplate.update(sql, ficha.tipo().getCodigo(), ficha.dataNotificacao(), ficha.dataSintoma(),
+                ficha.dataInvestigacao(), ficha.classificacaoFinal() == null ? null : ficha.classificacaoFinal().getCodigo(),
+                ficha.criterioConfirmacaoDescarte() == null ? null : ficha.criterioConfirmacaoDescarte().getCodigo(),
+                ficha.autoctone() == null ? null : ficha.autoctone().getCodigo(),
+                ficha.relacionadoTrabalho() == null ? null : ficha.relacionadoTrabalho().getCodigo(),
+                ficha.evolucaoCaso() == null ? null : ficha.evolucaoCaso().getCodigo(),
+                ficha.dataObito(), ficha.dataEncerramento(), ficha.observacoes(), id);
+        return findById(id);
     }
 
     public List<FichaNotificacao> findByUnidade(Unidade unidade) {
