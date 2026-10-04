@@ -52,6 +52,16 @@ public class UnidadeRepository {
         });
     }
 
+    public List<Unidade> findByMunicipio(Integer municipioCodigoIbge) {
+        final String sql = "SELECT * FROM Unidade WHERE municipio_codigo_ibge = ?";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new Unidade(
+                rs.getString("codigo"),
+                rs.getString("nome"),
+                DominioCodificado.fromCodigo(rs.getInt("tipo"), Unidade.Tipo.class),
+                localidadeRepository.findMunicipioByCodigoIbge(rs.getInt("municipio_codigo_ibge"))
+        ), municipioCodigoIbge);
+    }
+
     public List<Investigador> findInvestigadoresByUnidade(Unidade unidade) {
         final String sql = "SELECT i.* FROM Investigador i WHERE i.unidade_codigo = ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new Investigador(

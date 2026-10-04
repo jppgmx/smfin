@@ -49,6 +49,12 @@ button {
     cursor: pointer;
 }
 
+.button-secondary {
+    border-color: #aaa;
+    background: #fff;
+    color: #333;
+}
+
 .filters {
     margin: 24px 0;
     padding: 16px;
@@ -185,6 +191,61 @@ tbody tr:hover {
 .pagination .current {
     font-weight: bold;
     color: #222;
+}
+
+fieldset {
+    margin: 24px 0;
+    padding: 16px;
+    border: 1px solid #ccc;
+    background: #fff;
+}
+
+legend {
+    padding: 0 6px;
+    font-weight: bold;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+}
+
+textarea {
+    width: 100%;
+    margin-top: 6px;
+    padding: 8px;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    font: inherit;
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.form-message {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #aaa;
+    background: #fff;
+}
+
+.form-message.error {
+    border-color: #a33;
+    color: #922;
+}
+
+.form-message.success {
+    border-color: #397344;
+    color: #275c30;
+}
+
+[hidden] {
+    display: none !important;
 }
 
 @media (max-width: 650px) {

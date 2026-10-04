@@ -15,7 +15,7 @@
             <h1>Fichas de notificação</h1>
             <p>${nome}</p>
         </div>
-        <a class="button" href="#">Nova ficha</a>
+        <a class="button" href="/notificacao/nova">Nova ficha</a>
     </header>
 
     <section class="filters" aria-label="Filtros">

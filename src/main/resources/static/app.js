@@ -74,7 +74,7 @@ function renderRows(notifications) {
         const actions = document.createElement("td");
         actions.className = "actions";
         const edit = document.createElement("a");
-        edit.href = `/api/notificacao/${encodeURIComponent(notification.id)}`;
+        edit.href = `/notificacao/${encodeURIComponent(notification.id)}/editar`;
         edit.textContent = "Editar";
         edit.title = "A API ainda não possui uma tela HTML de edição";
         const remove = document.createElement("a");

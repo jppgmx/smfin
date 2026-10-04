@@ -42,6 +42,11 @@ public class FichaNotificacaoController {
         return ResponseEntity.ok(ficha);
     }
 
+    @PostMapping({"", "/"})
+    public ResponseEntity<FichaNotificacao> criar(@RequestBody FichaNotificacao ficha) {
+        return ResponseEntity.ok(service.save(ficha));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<FichaNotificacao> atualizar(
             @PathVariable String id, @RequestBody FichaNotificacao ficha) {
