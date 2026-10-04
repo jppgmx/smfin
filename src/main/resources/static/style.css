@@ -1,0 +1,204 @@
+:root {
+    font-family: Arial, sans-serif;
+    color: #222;
+    background: #f4f4f4;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+}
+
+main {
+    width: min(1400px, 100%);
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.page-header,
+.table-header,
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+h1 {
+    margin: 0 0 6px;
+    font-size: 24px;
+}
+
+p {
+    margin: 0;
+    color: #666;
+}
+
+.button,
+button {
+    display: inline-block;
+    padding: 9px 14px;
+    border: 1px solid #333;
+    border-radius: 3px;
+    background: #333;
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.filters {
+    margin: 24px 0;
+    padding: 16px;
+    border: 1px solid #ccc;
+    background: #fff;
+}
+
+.filters form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 12px;
+}
+
+label {
+    display: flex;
+    flex: 1 1 150px;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 13px;
+}
+
+input,
+select {
+    min-height: 34px;
+    padding: 7px;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    background: #fff;
+}
+
+.checkbox {
+    flex: 0 1 150px;
+    flex-direction: row;
+    align-items: center;
+    min-height: 34px;
+}
+
+.checkbox input {
+    min-height: auto;
+}
+
+.filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 34px;
+}
+
+.filter-actions a,
+.actions a,
+.pagination a {
+    color: #164b79;
+}
+
+.pagination a.disabled {
+    color: #999;
+    pointer-events: none;
+}
+
+.table-header {
+    margin-bottom: 10px;
+}
+
+.table-header label {
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+}
+
+.table-container {
+    overflow-x: auto;
+    border: 1px solid #ccc;
+    background: #fff;
+}
+
+table {
+    width: 100%;
+    min-width: 1050px;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+th,
+td {
+    padding: 11px 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    white-space: nowrap;
+}
+
+th {
+    background: #eee;
+    font-weight: bold;
+}
+
+tbody tr:hover {
+    background: #fafafa;
+}
+
+.status {
+    display: inline-block;
+    padding: 3px 7px;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.status-open {
+    color: #795500;
+    background: #fff8df;
+}
+
+.status-done {
+    color: #17622b;
+    background: #eaf7ed;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+.pagination {
+    margin-top: 16px;
+    font-size: 14px;
+}
+
+.pagination span:last-child {
+    display: flex;
+    gap: 12px;
+}
+
+.pagination .current {
+    font-weight: bold;
+    color: #222;
+}
+
+@media (max-width: 650px) {
+    main {
+        padding: 16px;
+    }
+
+    .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .pagination {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
